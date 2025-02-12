@@ -1,6 +1,19 @@
 import com.github.music.of.the.ainur.almaren.builder.Core.Implicit 
 import com.github.music.of.the.ainur.almaren.Almaren 
 import org.apache.spark.sql.*
+import java.io.*
+
+val tempFile = File.createTempFile("gcs-key", ".json")
+tempFile.deleteOnExit()
+new PrintWriter(tempFile) {
+  write(jsonContent)
+  close()
+}
+spark.conf.set("spark.hadoop.google.cloud.auth.service.account.enable", "true")
+spark.conf.set("spark.hadoop.google.cloud.auth.service.account.json.keyfile", tempFile.getAbsolutePath)
+spark.conf.set("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
+spark.conf.set("fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
+spark.conf.set("fs.gs.project.id", "modak-nabu")
 
 val almaren = Almaren("Demo1")
 val spark = almaren.spark.getOrCreate()
